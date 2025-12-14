@@ -6,7 +6,6 @@ WORKDIR /app
 
 # Копируем файл зависимостей packages.txt
 COPY packages.txt ./
-COPY ~/.ssh ./
 
 # Устанавливаем зависимости
 RUN pip install -r packages.txt
