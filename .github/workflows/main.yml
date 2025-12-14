@@ -43,6 +43,11 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            unset GIT_PROXY_COMMAND
+            unset http_proxy
+            unset https_proxy
+            unset all_proxy
+            
             mkdir -p /opt/flask-app
             cd /opt/flask-app
             git pull origin main
