@@ -57,6 +57,8 @@ jobs:
           SSH_USER_GIT: ${{  secrets.SSH_USER_GIT }}
         run: |
           echo $(pwd)
+          mkdir ~/.ssh
+          chmod 700 ~/.ssh
           echo "$SSH_USER_GIT" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
