@@ -51,10 +51,7 @@ jobs:
       
       - name: Deploy to SSH host (пример)
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USER: ${{ secrets.SSH_USER }}
-          SSH_USER_GIT: ${{  secrets.SSH_USER_GIT }}
+          SSH_USER_GIT: ${{ secrets.SSH_USER_GIT }}
         run: |
           echo $(pwd)
           mkdir ~/.ssh
