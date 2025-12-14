@@ -1,4 +1,4 @@
-name: Flask CI/CD Pipeline  # Имя пайплайна, видно в GitHub Actions
+name: Flask CI/CD Pipeline  # Имя пайплайна
 
 on:
   push:
