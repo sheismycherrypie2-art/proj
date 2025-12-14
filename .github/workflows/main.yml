@@ -1,38 +1,41 @@
-name: Flask CI/CD Pipeline
+name: Flask CI/CD Pipeline  # Имя пайплайна, видно в GitHub Actions
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main" ]      # Запускать на push в main
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main" ]      # Запускать на pull request в main
 
 jobs:
   test-and-build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest      # Среда для выполнения Ubuntu
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
+        # Клонирует репозиторий в рабочую директорию
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
-          
+        # Устанавливает нужную версию Python для тестов и сборки
+
       - name: Install dependencies
         run: |
           pip install -r packages.txt
-          
+        # Устанавливает зависимости проекта (пакеты)
+
       - name: Run basic test
         run: |
           python -c "import flask; print(f'Flask version: {flask.__version__}')"
-          
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-          
+        # Проверяет, что Flask установлен корректно
+
       - name: Build Docker image
         run: |
           docker build -t flask-app:latest .
-          
+        # Собирает Docker-образ из Dockerfile
+
       - name: Test Docker image
         run: |
           docker run --name test-flask -d -p 3000:3000 flask-app:latest
@@ -40,37 +43,54 @@ jobs:
           curl -f http://localhost:3000 || exit 1
           docker stop test-flask
           docker rm test-flask
+        # Запускает контейнер, проверяет доступность приложения через curl и удаляет контейнер
+        # Если curl возвращает ошибку, шаг падает и pipeline останавливается
+
   deploy:
     runs-on: ubuntu-latest
     needs: test-and-build
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
+    # Деплой выполняется только после успешного теста, на пуш в main
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
-      - name: Deploy to SSH host (пример)
+        # Клонируем репозиторий на runner, чтобы можно было деплоить
+
+      - name: Deploy to SSH host
         env:
           SSH_USER_GIT: ${{ secrets.SSH_USER_GIT }}
+          #Секрет ssh ключ git
         run: |
-          echo $(pwd)
-          mkdir ~/.ssh
+          # Настраиваем SSH для доступа к серверу
+          mkdir -p ~/.ssh
           chmod 700 ~/.ssh
           echo "$SSH_USER_GIT" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
+          # Настраиваем агент
           eval $(ssh-agent -s)
           ssh-add ~/.ssh/id_rsa
 
+          # Проверяем, что SSH настроен (отладка)
           echo $(ls -la ~)
-          
+
+          # Создаём директорию для приложения на сервере
           mkdir -p /opt/flask-app
           cd /opt/flask-app
+
+          # Если репозиторий ещё не склонирован — клонируем
           if [ ! -d .git ]; then
-          git clone git@github.com:sheismycherrypie2-art/proj.git .
+            git clone git@github.com:sheismycherrypie2-art/proj.git .
           fi
+
+          # Пулим проект
           git pull origin main
+
+          # Останавливаем старый контейнер и удаляем его
           docker stop flask-app || true
           docker rm flask-app || true
+
+          # Собираем новый образ и запускаем контейнер
           docker build -t flask-app .
           docker run -d --name flask-app -p 3000:3000 flask-app
