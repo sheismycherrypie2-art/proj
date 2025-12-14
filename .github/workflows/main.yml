@@ -58,7 +58,7 @@ jobs:
           mkdir -p /opt/flask-app
           cd /opt/flask-app
           if [ ! -d .git ]; then
-          git clone https://github.com/your-username/your-repo.git .
+          git clone git@github.com:sheismycherrypie2-art/proj.git .
           fi
           git pull origin main
           docker stop flask-app || true
