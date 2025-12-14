@@ -43,6 +43,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            mkdir -p /opt/flask-app
             cd /opt/flask-app
             git pull origin main
             docker stop flask-app || true
