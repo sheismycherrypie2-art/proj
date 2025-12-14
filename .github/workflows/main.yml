@@ -56,6 +56,7 @@ jobs:
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_USER_GIT: ${{  secrets.SSH_USER_GIT }}
         run: |
+          echo $(pwd)
           mkdir -p /opt/flask-app
           cd /opt/flask-app
           if [ ! -d .git ]; then
